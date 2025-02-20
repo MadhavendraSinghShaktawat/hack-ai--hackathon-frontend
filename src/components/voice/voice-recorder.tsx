@@ -5,23 +5,27 @@ interface VoiceRecorderProps {
   isRecording: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
+  disabled?: boolean;
 }
 
 export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   isRecording,
   onStartRecording,
   onStopRecording,
+  disabled = false,
 }) => {
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2">
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={!disabled && { scale: 1.05 }}
+        whileTap={!disabled && { scale: 0.95 }}
         onClick={isRecording ? onStopRecording : onStartRecording}
+        disabled={disabled}
         className={`
           w-16 h-16 rounded-full shadow-lg flex items-center justify-center
+          transition-all duration-200
           ${isRecording ? 'bg-red-500' : 'bg-blue-600'}
-          transition-colors duration-200
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}
         `}
       >
         <AnimatePresence>
