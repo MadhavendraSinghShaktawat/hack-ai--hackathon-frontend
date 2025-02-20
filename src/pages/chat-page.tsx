@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChatBox } from '../components/chat/chat-box';
 import { ChatHeader } from '../components/chat/chat-header';
+import { ChatBox } from '../components/chat/chat-box';
 import { ChatInput } from '../components/chat/chat-input';
 import { LoadingSpinner } from '../components/loading-spinner';
 import { chatService } from '../services/chat-service';
@@ -14,8 +14,8 @@ const TEMP_USER_ID = 'user123';
 export const ChatPage: React.FC = () => {
   const [isConnecting, setIsConnecting] = React.useState(true);
   const queryClient = useQueryClient();
-  const [messages, setMessages] = React.useState<Message[]>([]);
-  const [isTyping, setIsTyping] = React.useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Fetch chat history
   const { data: chatHistory, isLoading } = useQuery({
@@ -117,18 +117,14 @@ export const ChatPage: React.FC = () => {
     }
   };
 
-  if (isConnecting) {
-    return <LoadingSpinner message="Connecting to server..." />;
-  }
-
-  if (isLoading) {
+  if (isConnecting || isLoading) {
     return <LoadingSpinner />;
   }
 
   return (
-    <div className="flex flex-col min-h-screen pt-16">
-      <div className="flex-1 container mx-auto px-4 md:px-6 py-4">
-        <div className="flex flex-col h-[calc(100vh-6.5rem)] max-w-4xl mx-auto bg-white rounded-2xl shadow-sm">
+    <div className="h-screen pt-16 bg-gray-50">
+      <div className="h-full container mx-auto px-4 md:px-6 py-4">
+        <div className="h-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
           <ChatHeader onClearHistory={handleClearHistory} />
           <ChatBox 
             messages={messages} 

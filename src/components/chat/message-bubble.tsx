@@ -1,37 +1,29 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Message } from '../../types/chat';
-import clsx from 'clsx';
 
 interface MessageBubbleProps {
   message: Message;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isBot = message.sender === 'bot';
-  
+  const isUser = message.sender === 'user';
+
   return (
-    <div className={clsx(
-      'flex',
-      isBot ? 'justify-start' : 'justify-end'
-    )}>
-      <div className={clsx(
-        'max-w-[80%] rounded-2xl px-4 py-2',
-        isBot ? 'bg-gray-100' : 'bg-blue-600 text-white',
-        'animate-fade-in'
-      )}>
-        <p className="text-sm md:text-base whitespace-pre-wrap break-words">
-          {message.content}
-        </p>
-        <p className={clsx(
-          'text-xs mt-1',
-          isBot ? 'text-gray-500' : 'text-blue-100'
-        )}>
-          {new Date(message.timestamp).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
-        </p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+    >
+      <div
+        className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-6 py-4 
+          ${isUser 
+            ? 'bg-blue-600 text-white rounded-br-none' 
+            : 'bg-gray-100 text-gray-800 rounded-bl-none'
+          }`}
+      >
+        <p className="text-[15px] leading-relaxed">{message.content}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }; 

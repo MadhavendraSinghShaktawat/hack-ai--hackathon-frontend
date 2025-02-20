@@ -11,6 +11,7 @@ import MoodTrackingPage from './pages/mood-tracking';
 import LandingPage from './pages/landing-page';
 import MoodHistoryPage from './pages/mood-history';
 import DailyCheckInPage from './pages/daily-checkin';
+import VoiceChatPage from './pages/voice-chat';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ export const App: React.FC = () => {
               <Route path="/mood" element={<MoodTrackingPage />} />
               <Route path="/mood/history" element={<MoodHistoryPage />} />
               <Route path="/checkin" element={<DailyCheckInPage />} />
+              <Route path="/voice-chat" element={<VoiceChatPage />} />
             </Routes>
           </main>
         </div>

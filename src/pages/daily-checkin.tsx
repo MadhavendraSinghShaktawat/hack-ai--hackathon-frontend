@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { Activity, Category, CheckIn, MoodLevel } from '../types/checkin';
@@ -157,90 +157,186 @@ const DailyCheckInPage: React.FC = () => {
     }
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.4 }
+    }
+  };
+
   return (
     <div className="min-h-screen pt-20 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
           className="bg-white rounded-3xl shadow-sm p-8"
         >
           {/* Streak Section */}
-          <div className="text-center mb-12">
-            <div className="inline-block p-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 mb-4">
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <motion.div 
+            variants={itemVariants}
+            className="text-center mb-12"
+          >
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-block p-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 mb-4"
+            >
+              <motion.svg 
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-8 h-8 text-white" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-              </svg>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{streakData.currentStreak}</h1>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Week Streak</h2>
+              </motion.svg>
+            </motion.div>
+            <motion.h1 
+              variants={itemVariants}
+              className="text-4xl font-bold text-gray-900 mb-2"
+            >
+              {streakData.currentStreak}
+            </motion.h1>
+            <motion.h2 
+              variants={itemVariants}
+              className="text-2xl font-bold text-gray-900 mb-2"
+            >
+              Week Streak
+            </motion.h2>
             <p className="text-gray-600">You are doing really great, Anna!</p>
-          </div>
+          </motion.div>
 
           {/* Calendar Week View */}
-          <div className="mb-12">
+          <motion.div 
+            variants={itemVariants}
+            className="mb-12"
+          >
             <div className="grid grid-cols-7 gap-4 text-center mb-4">
               {streakData.weekDays.map((day) => (
-                <div key={day.label} className="text-sm text-gray-600">
+                <motion.div
+                  key={day.label}
+                  whileHover={{ scale: 1.1 }}
+                  className="text-sm text-gray-600"
+                >
                   {day.label}
-                </div>
+                </motion.div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-4">
               {streakData.weekDays.map((day, i) => (
-                <div key={i} className="text-center">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="text-center"
+                >
                   {day.isCompleted ? (
-                    <div className="w-10 h-10 mx-auto rounded-full bg-orange-400 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-10 h-10 mx-auto rounded-full bg-orange-400 flex items-center justify-center"
+                    >
+                      <motion.svg
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.5, delay: i * 0.05 }}
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </motion.svg>
+                    </motion.div>
                   ) : (
-                    <div className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center
-                      ${day.isToday ? 'bg-blue-100' : 'bg-gray-100'}`}
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center
+                        ${day.isToday ? 'bg-blue-100' : 'bg-gray-100'}`}
                     >
                       <span className={`text-sm ${
                         day.isToday ? 'text-blue-600 font-medium' : 'text-gray-600'
                       }`}>
                         {format(day.date, 'd')}
                       </span>
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Stats Section */}
-          <div className="bg-gray-50 rounded-2xl p-6 mb-8">
+          <motion.div
+            variants={itemVariants}
+            className="bg-gray-50 rounded-2xl p-6 mb-8"
+          >
             <h3 className="text-gray-600 mb-6">Your Stats</h3>
             <div className="grid grid-cols-4 gap-8">
-              <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">Days</p>
-                <p className="text-2xl font-bold text-gray-900">{streakData.stats.days}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">Lessons</p>
-                <p className="text-2xl font-bold text-gray-900">{streakData.stats.lessons}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">Quizzes</p>
-                <p className="text-2xl font-bold text-gray-900">{streakData.stats.quizzes}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">Minutes</p>
-                <p className="text-2xl font-bold text-gray-900">{streakData.stats.minutes}</p>
-              </div>
+              {Object.entries(streakData.stats).map(([key, value], i) => (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="text-center"
+                >
+                  <p className="text-gray-600 text-sm mb-2">{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+                  <motion.p
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="text-2xl font-bold text-gray-900"
+                  >
+                    {value}
+                  </motion.p>
+                </motion.div>
+              ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Insights Section */}
-          <div className="flex items-center gap-2 text-blue-600">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+            className="flex items-center gap-2 text-blue-600 cursor-pointer"
+          >
+            <motion.svg
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            </motion.svg>
             <span className="font-medium">2 Insights Available</span>
-          </div>
+          </motion.div>
 
           {/* Original form content starts here */}
           <form onSubmit={handleSubmit} className="space-y-8 mt-12">
