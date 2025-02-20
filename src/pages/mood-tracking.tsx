@@ -76,14 +76,24 @@ const MoodTrackingPage: React.FC = () => {
         >
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Track Your Mood</h1>
-            <Link
-              to="/mood/history"
-              className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium 
-                       flex items-center gap-2 group"
-            >
-              View History
-              <span className="transform transition-transform group-hover:translate-x-1">→</span>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/checkin"
+                className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium 
+                         flex items-center gap-2 group"
+              >
+                Daily Check-in
+                <span className="transform transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+              <Link
+                to="/mood/history"
+                className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium 
+                         flex items-center gap-2 group"
+              >
+                View History
+                <span className="transform transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
