@@ -3,7 +3,7 @@ import { Message } from '../types/chat';
 
 const API_URL = 'http://localhost:3000/api';
 
-interface ApiResponse {
+interface ChatHistoryItem {
   userId: string;
   message: string;
   response: string;
@@ -13,17 +13,16 @@ interface ApiResponse {
 export const chatService = {
   async sendMessage(userId: string, message: string): Promise<Message> {
     try {
-      console.log('Sending message:', { userId, message }); // Debug log
-      const response = await axios.post<ApiResponse>(`${API_URL}/chat`, {
+      console.log('Sending message:', { userId, message });
+      const response = await axios.post<ChatHistoryItem>(`${API_URL}/chat`, {
         userId,
         message,
       });
-      console.log('API Response:', response.data); // Debug log
+      console.log('API Response:', response.data);
 
-      // Create bot message from response
       const botMessage: Message = {
         id: `bot-${Date.now()}`,
-        content: response.data.response, // Use response field from API
+        content: response.data.response,
         sender: 'bot',
         timestamp: new Date(response.data.timestamp),
       };
@@ -37,8 +36,31 @@ export const chatService = {
 
   async getChatHistory(userId: string): Promise<{ messages: Message[] }> {
     try {
-      const response = await axios.get(`${API_URL}/chat/history/${userId}`);
-      return response.data;
+      const response = await axios.get<ChatHistoryItem[]>(`${API_URL}/chat/history/${userId}`);
+      console.log('Raw history response:', response.data);
+
+      // Convert history items into messages (newest first)
+      const messages: Message[] = [];
+      response.data.reverse().forEach((item) => {
+        // Add user message
+        messages.push({
+          id: `user-${item.timestamp}`,
+          content: item.message,
+          sender: 'user',
+          timestamp: new Date(item.timestamp),
+        });
+
+        // Add bot response
+        messages.push({
+          id: `bot-${item.timestamp}`,
+          content: item.response,
+          sender: 'bot',
+          timestamp: new Date(item.timestamp),
+        });
+      });
+
+      console.log('Processed messages:', messages);
+      return { messages };
     } catch (error) {
       console.error('Error fetching chat history:', error);
       throw new Error('Failed to fetch chat history');

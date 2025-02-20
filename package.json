@@ -1,6 +1,7 @@
 {
   "name": "hackai-frontend",
   "version": "1.0.0",
+  "homepage": ".",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --mode development --open",

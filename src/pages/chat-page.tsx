@@ -15,6 +15,30 @@ export const ChatPage: React.FC = () => {
   const [isConnecting, setIsConnecting] = React.useState(true);
   const queryClient = useQueryClient();
   const [messages, setMessages] = React.useState<Message[]>([]);
+  const [isTyping, setIsTyping] = React.useState(false);
+
+  // Fetch chat history
+  const { data: chatHistory, isLoading } = useQuery({
+    queryKey: ['chatHistory', TEMP_USER_ID],
+    queryFn: () => chatService.getChatHistory(TEMP_USER_ID),
+    select: (data) => {
+      console.log('Processing chat history:', data);
+      return data.messages;
+    },
+    // Disable automatic refetching
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
+  });
+
+  // Update messages when chat history changes
+  React.useEffect(() => {
+    console.log('Chat history updated:', chatHistory);
+    if (chatHistory && Array.isArray(chatHistory)) {
+      console.log('Setting messages from history:', chatHistory);
+      setMessages(chatHistory);
+    }
+  }, [chatHistory]);
 
   // Initialize API connection
   React.useEffect(() => {
@@ -31,13 +55,6 @@ export const ChatPage: React.FC = () => {
     initializeConnection();
   }, []);
 
-  // Fetch chat history
-  const { data: chatHistory, isLoading } = useQuery({
-    queryKey: ['chatHistory', TEMP_USER_ID],
-    queryFn: () => chatService.getChatHistory(TEMP_USER_ID),
-    select: (data) => data.messages || [],
-  });
-
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -51,10 +68,18 @@ export const ChatPage: React.FC = () => {
 
       // Add user message to state
       setMessages(prev => [...prev, userMessage]);
+      
+      // Show typing indicator
+      setIsTyping(true);
 
-      // Send to API and get bot's response
-      const botMessage = await chatService.sendMessage(TEMP_USER_ID, content);
-      return botMessage;
+      try {
+        // Send to API and get bot's response
+        const botMessage = await chatService.sendMessage(TEMP_USER_ID, content);
+        return botMessage;
+      } finally {
+        // Hide typing indicator
+        setIsTyping(false);
+      }
     },
     onSuccess: (botMessage) => {
       // Add bot message to state
@@ -62,6 +87,7 @@ export const ChatPage: React.FC = () => {
     },
     onError: (error) => {
       console.error('Failed to send message:', error);
+      setIsTyping(false);
     },
   });
 
@@ -69,6 +95,8 @@ export const ChatPage: React.FC = () => {
   const clearHistoryMutation = useMutation({
     mutationFn: () => chatService.clearChatHistory(TEMP_USER_ID),
     onSuccess: () => {
+      // Clear messages state when history is cleared
+      setMessages([]);
       queryClient.setQueryData(['chatHistory', TEMP_USER_ID], []);
     },
   });
@@ -102,7 +130,10 @@ export const ChatPage: React.FC = () => {
       <ChatHeader onClearHistory={handleClearHistory} />
       <div className="flex-1 container mx-auto px-4 md:px-6 py-4 overflow-hidden">
         <div className="flex flex-col h-full max-w-4xl mx-auto bg-white rounded-2xl shadow-sm">
-          <ChatBox messages={messages} />
+          <ChatBox 
+            messages={messages} 
+            isTyping={isTyping}
+          />
           <ChatInput 
             onSendMessage={handleSendMessage} 
             isLoading={sendMessageMutation.isPending}

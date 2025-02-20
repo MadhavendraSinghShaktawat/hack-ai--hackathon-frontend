@@ -71,7 +71,7 @@ export const HeroSection: React.FC = () => {
             className="md:w-1/2 mt-12 md:mt-0"
           >
             <img 
-              src="/therapy-illustration.svg" 
+              src="/therapy-illustration.webp" 
               alt="Therapy Illustration" 
               className="w-full h-auto"
             />
