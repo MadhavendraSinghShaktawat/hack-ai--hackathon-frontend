@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { ChatMessage, ChatResponse } from '../types/chat';
 
 // Add type definitions for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -57,6 +58,7 @@ export const useVoiceChat = () => {
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -117,6 +119,51 @@ export const useVoiceChat = () => {
     return recognition;
   };
 
+  const sendToAI = async (text: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/voice/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          context: chatHistory
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: errorData
+        });
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
+
+      if (data.status === 'success' && data.data.response) {
+        const newMessage: ChatMessage = {
+          role: 'assistant',
+          content: data.data.response
+        };
+        setChatHistory(data.data.history || [...chatHistory, 
+          { role: 'user', content: text },
+          newMessage
+        ]);
+        return data.data.response;
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('API Error Details:', err);
+      throw err;
+    }
+  };
+
   const startRecording = useCallback(async () => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -138,27 +185,39 @@ export const useVoiceChat = () => {
     setIsRecording(false);
     setInterimTranscript('');
 
-    // Use the final transcript or the current interim transcript
     const finalText = transcript || interimTranscript;
     if (finalText) {
       setIsProcessing(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setResponse(`I heard you say: "${finalText}". This is a simulated response.`);
+        console.log('Sending text to AI:', finalText); // Debug log
+        const aiResponse = await sendToAI(finalText);
+        setResponse(aiResponse);
       } catch (err) {
         console.error('Failed to process recording:', err);
-        setResponse('Sorry, I had trouble processing that. Could you try again?');
+        // More specific error messages
+        if (err instanceof Error) {
+          if (err.message.includes('API Error: 401')) {
+            setResponse('Authentication error. Please try again.');
+          } else if (err.message.includes('API Error: 429')) {
+            setResponse('Too many requests. Please wait a moment.');
+          } else if (err.message.includes('Failed to fetch')) {
+            setResponse('Network error. Please check your connection.');
+          } else {
+            setResponse('Sorry, I had trouble processing that. Please try again.');
+          }
+        }
       } finally {
         setIsProcessing(false);
       }
     }
-  }, [transcript, interimTranscript]);
+  }, [transcript, interimTranscript, chatHistory]);
 
   return {
     isRecording,
-    transcript: interimTranscript || transcript, // Return interim results while recording
+    transcript: interimTranscript || transcript,
     response,
     isProcessing,
+    chatHistory,
     startRecording,
     stopRecording,
   };

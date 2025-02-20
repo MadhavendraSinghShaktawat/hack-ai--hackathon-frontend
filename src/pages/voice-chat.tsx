@@ -52,40 +52,44 @@ export const VoiceChatPage: React.FC = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="px-4 py-6 space-y-6">
-              {!transcript && !response && (
-                <div className="text-center text-gray-500">
+            <div className="px-4 py-6 space-y-6 min-h-[200px] contain-layout">
+              {!transcript && !response ? (
+                <div className="text-center text-gray-500 min-h-[50px] flex items-center justify-center">
                   Click the microphone button to start speaking...
                 </div>
-              )}
-              
-              {transcript && (
-                <VoiceChatBubble 
-                  isUser={true} 
-                  content={transcript} 
-                  isAudio={true}
-                  isSpeaking={isRecording} 
-                />
-              )}
+              ) : (
+                <div className="space-y-6">
+                  {transcript && (
+                    <VoiceChatBubble 
+                      isUser={true} 
+                      content={transcript} 
+                      isAudio={true}
+                      isSpeaking={isRecording} 
+                    />
+                  )}
 
-              {isProcessing && <VoiceProcessing />}
+                  {isProcessing && <VoiceProcessing />}
 
-              {response && (
-                <VoiceChatBubble 
-                  isUser={false} 
-                  content={response}
-                  isAudio={true}
-                  isSpeaking={isSpeaking} 
-                />
+                  {response && (
+                    <VoiceChatBubble 
+                      isUser={false} 
+                      content={response}
+                      isAudio={true}
+                      isSpeaking={isSpeaking} 
+                    />
+                  )}
+                </div>
               )}
             </div>
           </div>
 
-          <VoiceRecorder
-            isRecording={isRecording}
-            onStartRecording={startRecording}
-            onStopRecording={stopRecording}
-          />
+          <div className="h-24 flex items-center justify-center">
+            <VoiceRecorder
+              isRecording={isRecording}
+              onStartRecording={startRecording}
+              onStopRecording={stopRecording}
+            />
+          </div>
         </div>
       </div>
     </div>
