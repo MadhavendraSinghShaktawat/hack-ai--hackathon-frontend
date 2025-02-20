@@ -52,13 +52,43 @@ declare global {
   }
 }
 
+const VOICE_CHAT_HISTORY_KEY = 'voice-chat-history';
+
+const loadChatHistory = (): ChatMessage[] => {
+  try {
+    const savedHistory = localStorage.getItem(VOICE_CHAT_HISTORY_KEY);
+    return savedHistory ? JSON.parse(savedHistory) : [];
+  } catch (err) {
+    console.error('Failed to load chat history:', err);
+    return [];
+  }
+};
+
+const saveChatHistory = (messages: ChatMessage[]) => {
+  try {
+    localStorage.setItem(VOICE_CHAT_HISTORY_KEY, JSON.stringify(messages));
+  } catch (err) {
+    console.error('Failed to save chat history:', err);
+  }
+};
+
 export const useVoiceChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(loadChatHistory);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const latestResponseRef = useRef<string>('');
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    saveChatHistory(messages);
+  }, [messages]);
+
+  const clearHistory = useCallback(() => {
+    setMessages([]);
+    localStorage.removeItem(VOICE_CHAT_HISTORY_KEY);
+  }, []);
 
   const sendToAI = async (text: string): Promise<string> => {
     try {
@@ -70,7 +100,7 @@ export const useVoiceChat = () => {
         },
         body: JSON.stringify({
           text,
-          context: messages
+          context: messages.slice(-10) // Send only last 10 messages for context
         }),
       });
 
@@ -83,7 +113,16 @@ export const useVoiceChat = () => {
       if (data.status === 'success' && data.data?.response) {
         const cleanResponse = data.data.response.replace(/^"|"$/g, '');
         if (data.data.history) {
-          setMessages(data.data.history);
+          setMessages(prev => {
+            const newMessages = [...prev];
+            // Add only new messages from history
+            data.data.history.forEach((msg: ChatMessage) => {
+              if (!newMessages.some(m => m.content === msg.content)) {
+                newMessages.push(msg);
+              }
+            });
+            return newMessages;
+          });
         }
         latestResponseRef.current = cleanResponse;
         return cleanResponse;
@@ -192,5 +231,6 @@ export const useVoiceChat = () => {
     messages,
     startRecording,
     stopRecording,
+    clearHistory,
   };
 }; 

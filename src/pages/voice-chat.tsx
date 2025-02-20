@@ -11,6 +11,7 @@ export const VoiceChatPage: React.FC = () => {
     messages,
     startRecording,
     stopRecording,
+    clearHistory,
   } = useVoiceChat();
 
   return (
@@ -19,18 +20,31 @@ export const VoiceChatPage: React.FC = () => {
         <div className="h-[calc(100vh-8rem)] max-w-4xl mx-auto bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden border border-gray-100">
           {/* Header */}
           <div className="border-b border-gray-100 px-6 py-4 bg-white/80 backdrop-blur-sm">
-            <div className="flex items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/chat')}
-                className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </motion.button>
-              <h1 className="text-2xl font-bold text-gray-900">Voice Chat</h1>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/chat')}
+                  className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </motion.button>
+                <h1 className="text-2xl font-bold text-gray-900">Voice Chat</h1>
+              </div>
+              
+              {messages.length > 0 && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={clearHistory}
+                  className="px-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+                >
+                  Clear History
+                </motion.button>
+              )}
             </div>
           </div>
 
