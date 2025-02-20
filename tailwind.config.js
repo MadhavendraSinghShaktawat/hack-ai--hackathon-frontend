@@ -38,11 +38,22 @@ module.exports = {
         'bounce': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' }
+        },
+        'wave-slow': {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-20px) rotate(1deg)' }
+        },
+        'wave-fast': {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-15px) rotate(-1deg)' }
         }
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
-        'bounce': 'bounce 1s infinite'
+        'bounce': 'bounce 1s infinite',
+        'wave-slow': 'wave-slow 7s ease-in-out infinite',
+        'wave-fast': 'wave-fast 5s ease-in-out infinite',
+        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       }
     },
   },

@@ -126,10 +126,10 @@ export const ChatPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <ChatHeader onClearHistory={handleClearHistory} />
-      <div className="flex-1 container mx-auto px-4 md:px-6 py-4 overflow-hidden">
-        <div className="flex flex-col h-full max-w-4xl mx-auto bg-white rounded-2xl shadow-sm">
+    <div className="flex flex-col min-h-screen pt-16">
+      <div className="flex-1 container mx-auto px-4 md:px-6 py-4">
+        <div className="flex flex-col h-[calc(100vh-6.5rem)] max-w-4xl mx-auto bg-white rounded-2xl shadow-sm">
+          <ChatHeader onClearHistory={handleClearHistory} />
           <ChatBox 
             messages={messages} 
             isTyping={isTyping}

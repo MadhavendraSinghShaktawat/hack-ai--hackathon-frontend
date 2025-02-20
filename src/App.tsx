@@ -7,6 +7,9 @@ import Features from './components/Features';
 import Footer from './components/Footer';
 import { HomePage } from './pages/home-page';
 import { ChatPage } from './pages/chat-page';
+import MoodTrackingPage from './pages/mood-tracking';
+import LandingPage from './pages/landing-page';
+import MoodHistoryPage from './pages/mood-history';
 
 const queryClient = new QueryClient();
 
@@ -14,10 +17,17 @@ export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/chat" element={<ChatPage />} />
-        </Routes>
+        <div className="min-h-screen bg-white">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/mood" element={<MoodTrackingPage />} />
+              <Route path="/mood/history" element={<MoodHistoryPage />} />
+            </Routes>
+          </main>
+        </div>
       </Router>
     </QueryClientProvider>
   );
